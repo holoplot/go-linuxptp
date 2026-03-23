@@ -148,7 +148,7 @@ func (c *Clock) RequestExternalTimestamp(channel int, flags ExternalTimestampFla
 		flags: uint32(flags),
 	}
 	p := unsafe.Pointer(&o)
-	code := ptpIoctlMakeCode(ioctlDirWrite, magicExternalTimestampRequest2, uintptr(unsafe.Sizeof(o)))
+	code := ptpIoctlMakeCode(ioctlDirWrite, magicExternalTimestampRequest, uintptr(unsafe.Sizeof(o)))
 
 	err := doIoctl(c.file.Fd(), code, p)
 	if err != nil {

@@ -2,10 +2,10 @@ package main
 
 import (
 	"flag"
+	"log/slog"
 
+	"github.com/holoplot/go-linuxptp/pkg/logger"
 	"github.com/holoplot/go-linuxptp/pkg/ptp"
-	"github.com/mattn/go-colorable"
-	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
 )
 
@@ -13,70 +13,57 @@ func main() {
 	indexFlag := flag.Int("index", 0, "Index of PTP device to use")
 	flag.Parse()
 
-	consoleWriter := zerolog.ConsoleWriter{
-		Out: colorable.NewColorableStdout(),
-	}
-
-	log.Logger = log.Output(consoleWriter)
+	logger.Setup()
 
 	c, err := ptp.Open(*indexFlag)
 	if err != nil {
 		log.Fatal().Err(err).Msg("Failed to open PTP device")
 	}
 
-	log.Info().
-		Str("name", c.GetName()).
-		Int("maxFrequencyAdjustment", c.GetMaxFrequencyAdjustment()).
-		Int("alarms", c.GetAlarms()).
-		Int("pins", c.GetPins()).
-		Int("externalTimestampChannels", c.GetExternalTimestampChannels()).
-		Int("programmablePeriodicSignals", c.GetProgrammablePeriodicSignals()).
-		Bool("ppsCallbackSupport", c.GetPpsCallbackSupport()).
-		Bool("crossTimestamping", c.GetCrossTimestampingSupport()).
-		Msg("Read device information")
+	slog.Info("Read device information",
+		"name", c.GetName(),
+		"maxFrequencyAdjustment", c.GetMaxFrequencyAdjustment(),
+		"alarms", c.GetAlarms(),
+		"pins", c.GetPins(),
+		"externalTimestampChannels", c.GetExternalTimestampChannels(),
+		"programmablePeriodicSignals", c.GetProgrammablePeriodicSignals(),
+		"ppsCallbackSupport", c.GetPpsCallbackSupport(),
+		"crossTimestamping", c.GetCrossTimestampingSupport(),
+	)
 
 	if t, err := c.GetTime(); err != nil {
-		log.Error().
-			Err(err).
-			Msg("Failed to get current time")
+		slog.Error("Failed to get time", "error", err)
 	} else {
-		log.Info().
-			Str("currentTime", t.String()).
-			Msg("current time")
+		slog.Info("Got current time", "currentTime", t.String())
 	}
 
 	if m, err := c.GetSystemOffset(1); err != nil {
-		log.Warn().
-			Err(err).
-			Msg("Failed to get system offset")
+		slog.Warn("Failed to get system offset", "error", err)
 	} else {
-		log.Info().
-			Str("system", m[0].System.String()).
-			Str("phc", m[0].Phc.String()).
-			Msg("Got system offset")
+		slog.Info("Got system offset",
+			"system", m[0].System.String(),
+			"phc", m[0].Phc.String(),
+		)
 	}
 
 	if m, err := c.GetSystemOffsetExtended(1); err != nil {
-		log.Warn().
-			Err(err).
-			Msg("Failed to get extended system offset")
+		slog.Warn("Failed to get extended system offset", "error", err)
 	} else {
-		log.Info().
-			Str("system1", m[0].System1.String()).
-			Str("phc", m[0].Phc.String()).
-			Str("system2", m[0].System2.String()).
-			Msg("Got extended system offset")
+		slog.Info("Got extended system offset",
+			"system1", m[0].System1.String(),
+			"phc", m[0].Phc.String(),
+			"system2", m[0].System2.String(),
+			"diff(system1,phc)", m[0].System1.Sub(m[0].Phc).String(),
+		)
 	}
 
 	if m, err := c.GetSystemOffsetPrecise(1); err != nil {
-		log.Warn().
-			Err(err).
-			Msg("Failed to get precise system offset")
+		slog.Warn("Failed to get precise system offset", "error", err)
 	} else {
-		log.Info().
-			Str("device", m.Device.String()).
-			Str("systemMonotonicRaw", m.SystemMonotonicRaw.String()).
-			Str("systemRealTime", m.SystemRealTime.String()).
-			Msg("Got precise system offset")
+		slog.Info("Got precise system offset",
+			"device", m.Device.String(),
+			"systemMonotonicRaw", m.SystemMonotonicRaw.String(),
+			"systemRealTime", m.SystemRealTime.String(),
+		)
 	}
 }

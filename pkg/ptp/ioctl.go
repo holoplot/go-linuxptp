@@ -50,7 +50,7 @@ type magic int
 const (
 	// deprecated
 	// magicGetCaps           = magic(1)
-	// magicExternalTimestampRequest     = magic(2)
+	magicExternalTimestampRequest = magic(2)
 	// magicPerOutRequest     = magic(3)
 	// magicEnablePps         = magic(4)
 	// magicSysOffset         = magic(5)
