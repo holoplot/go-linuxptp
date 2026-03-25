@@ -250,7 +250,7 @@ func (c *Clock) GetSystemOffset(samples int) ([]SystemOffsetMeasurement, error) 
 
 	m := make([]SystemOffsetMeasurement, 0, samples)
 
-	for i := 0; i < samples; i++ {
+	for i := range samples {
 		m = append(m, SystemOffsetMeasurement{
 			System: o.ts[i*2].time(),
 			Phc:    o.ts[i*2+1].time(),
@@ -274,7 +274,7 @@ func (c *Clock) GetSystemOffsetExtended(samples int) ([]SystemOffsetMeasurementE
 
 	m := make([]SystemOffsetMeasurementExtended, 0, samples)
 
-	for i := 0; i < samples; i++ {
+	for i := range samples {
 		m = append(m, SystemOffsetMeasurementExtended{
 			System1: o.ts[i][0].time(),
 			Phc:     o.ts[i][1].time(),
